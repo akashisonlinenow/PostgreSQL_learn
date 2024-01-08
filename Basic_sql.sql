@@ -121,5 +121,49 @@ select class_name from classes as c join subjects as s on c.subject_id = s.subje
 select distinct (first_name||' '||last_name) as full_name from staff as stf
 	join classes as cls on stf.staff_id=cls.teacher_id
 	join subjects as sub on cls.subject_id=sub.subject_id
-	where sub.subject_name='Mathematics'
-;
+	where sub.subject_name='Mathematics';
+
+-- unoin and union all
+-- fetch all staff who teach grade 8,9,10 and also fetch all the non-teching staff
+select stf.staff_type, (stf.first_name||' '||stf.last_name) as full_name, stf.age,
+	(case when stf.gender='M' then 'Male'
+	 	when stf.gender='F' then 'Female'             -- while using union, no. of column in first and second should be same, and datatype of the select in both the query should be same
+	end ) as Gender,
+	stf.join_date
+	from staff stf				
+	join classes as cls 
+	on cls.teacher_id = stf.staff_id
+	where stf.staff_type='Teaching'
+	and cls.class_name in ('Grade 8', 'Grade 9', 'Grade 10')
+union													-- union takes all the common elements only once. hence no duplicacy, to include duplicacy use union all in place of union
+select stf.staff_type, (stf.first_name||' '||stf.last_name) as full_name,
+	stf.age, 
+	(case when stf.gender='Male' then 'M'
+		when stf.gender='Female' then 'F'
+	end) as Gender,
+	stf.join_date
+	from staff as stf
+	where stf.staff_type='Non-Teaching';
+	
+-- group by statements
+--count no. of students in each class
+select stcls.class_id, count(1) as no_of_students
+from student_classes as stcls
+group by stcls.class_id
+order by stcls.class_id;
+
+--fetch only those classes which have >100 students
+select stcls.class_id, count(1) as no_of_students
+from student_classes as stcls
+group by stcls.class_id
+having count(1)>100
+order by stcls.class_id;
+
+--parents with more than one kid in shool
+select sp.parent_id, count(1) as no_of_kids from student_parent as sp
+group by sp.parent_id
+having count(1)>1
+order by sp.parent_id;
+
+-- Subquery- - query written inside a query
+-- fetch the details of parents having more than one student going to school

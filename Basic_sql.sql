@@ -167,3 +167,89 @@ order by sp.parent_id;
 
 -- Subquery- - query written inside a query
 -- fetch the details of parents having more than one student going to school
+select (p.first_name||' '||p.last_name) as Parent_name, 
+		(s.first_name||' '||s.last_name) as Student_name,
+		s.gender as Student_gender,
+		s.age as Student_age,
+		(a.street||' '||a.city||' '||a.state||' '||a.country) as Address
+from parents as p join student_parent as sp on p.id=sp.parent_id 
+join students as s on s.id=sp.student_id
+join address as a on a.address_id=p.address_id 
+where p.id in (select sp.parent_id from student_parent as sp
+			  group by sp.parent_id
+			  having count(1)>1)
+order by 1;
+
+--aggregate functions - (avg, min, max, sum, count) - it is used to perform calculations on a set of values
+--avg
+--compute avg salary of all non-teaching staff
+select avg(ss.salary) from staff_salary as ss 
+join staff as s on ss.staff_id = s.staff_id
+where s.staff_type='Non-Teaching';
+
+--sum
+--total sum of salary paid to all the staff
+select s.staff_type, sum(ss.salary) as total_salary from staff_salary as ss
+join staff as s on s.staff_id = ss.staff_id
+group by s.staff_type;
+
+--min
+-- fetch min salary in teaching and non-teaching
+select stf.staff_type, min(ss.salary) as Min_salary 
+from staff as stf 
+join staff_salary as ss on stf.staff_id = ss.staff_id
+group by stf.staff_type;
+
+--max
+-- fetch max salary in teaching and non-teaching
+select stf.staff_type, max(ss.salary) as Min_salary 
+from staff as stf 
+join staff_salary as ss on stf.staff_id = ss.staff_id
+group by stf.staff_type;
+
+-- sql joins
+-- 1) Inner join - (default as join keyword)
+-- 2) Outer join
+-- 		1) Right join
+-- 		2) Left join
+-- 		3) Full Outer join
+
+-- fetch all staff name and salary info
+-- 21 matching records present in both tables
+-- inner join
+select * from staff;   -- total 23 records -- only 21 match with staff table
+select * from staff_salary;  -- toatl 24 records -- only 21 match with staff table
+
+select count(1) from staff as stf
+join staff_salary as ss on ss.staff_id = stf.staff_id;   -- only 21 records matches 
+
+select distinct (stf.first_name||' '||stf.last_name) as Full_name,
+ss.salary from staff as stf
+join staff_salary as ss on ss.staff_id = stf.staff_id;   -- only 21 records matches 
+
+-- left join
+-- 23 records present in left table
+select count(1) from staff as stf
+left join staff_salary as ss on ss.staff_id = stf.staff_id;
+
+select distinct (stf.first_name||' '||stf.last_name) as Full_name,
+ss.salary from staff as stf
+left join staff_salary as ss on ss.staff_id = stf.staff_id;
+
+--right join
+-- 24 records present in right table
+select count(1) from staff as stf
+right join staff_salary as ss on ss.staff_id = stf.staff_id;
+
+select distinct (stf.first_name||' '||stf.last_name) as Full_name,
+ss.salary from staff as stf
+right join staff_salary as ss on ss.staff_id = stf.staff_id;
+
+-- full outer join
+-- 26 records from both tables - 21 matching records + 2 records from left + 3 from right table 
+select count(1) from staff as stf
+full outer join staff_salary as ss on ss.staff_id = stf.staff_id;
+
+select distinct (stf.first_name||' '||stf.last_name) as Full_name,
+ss.salary from staff as stf
+full outer join staff_salary as ss on ss.staff_id = stf.staff_id;
